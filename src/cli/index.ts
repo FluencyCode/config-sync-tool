@@ -104,7 +104,14 @@ export function buildCli(): Command {
             to: options.to,
             homeDir: context.homeDir,
             projectDir: context.projectDir,
-            changeCount: result.diff.profileChanges.length + result.diff.ruleChanges.length
+            changeCount: result.diff.profileChanges.length
+              + result.diff.ruleChanges.length
+              + result.diff.skillChanges.length
+              + result.diff.mcpChanges.length
+              + result.diff.hookChanges.length,
+            skillChanges: result.diff.skillChanges,
+            mcpChanges: result.diff.mcpChanges,
+            hookChanges: result.diff.hookChanges
           }))
     })
 

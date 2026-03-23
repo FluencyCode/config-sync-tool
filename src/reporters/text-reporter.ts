@@ -62,13 +62,33 @@ export function renderDiffTextReport(input: {
   homeDir: string
   projectDir?: string
   changeCount: number
+  skillChanges?: Array<{ name: string, changeType: string }>
+  mcpChanges?: Array<{ name: string, changeType: string }>
+  hookChanges?: Array<{ name: string, event: string, changeType: string }>
 }): string {
+  const lines = [
+    ...buildContextLines(input),
+    `changes: ${input.changeCount}`
+  ]
+
+  if (input.skillChanges && input.skillChanges.length > 0) {
+    lines.push('[skills]')
+    lines.push(...input.skillChanges.map((change) => `- ${change.changeType}: ${change.name}`))
+  }
+
+  if (input.mcpChanges && input.mcpChanges.length > 0) {
+    lines.push('[mcps]')
+    lines.push(...input.mcpChanges.map((change) => `- ${change.changeType}: ${change.name}`))
+  }
+
+  if (input.hookChanges && input.hookChanges.length > 0) {
+    lines.push('[hooks]')
+    lines.push(...input.hookChanges.map((change) => `- ${change.changeType}: ${change.name} (${change.event})`))
+  }
+
   return renderTextReport({
     title: `Diff result (${input.from} -> ${input.to})`,
-    lines: [
-      ...buildContextLines(input),
-      `changes: ${input.changeCount}`
-    ]
+    lines
   })
 }
 

@@ -79,6 +79,78 @@ export function buildSyncPlan(input: BuildSyncPlanInput): SyncPlan {
     })
   }
 
+  for (const change of input.diff.skillChanges) {
+    if (change.sourceSkill?.portability === 'manual') {
+      skipped.push({
+        code: 'MANUAL_SKILL_MAPPING',
+        reason: `Skill ${change.name} requires manual mapping.`
+      })
+      manualActions.push({
+        title: `Review skill ${change.name}`,
+        description: 'Manually adapt this skill for the target platform.'
+      })
+      steps.push({
+        type: 'skip',
+        message: `Skip manual skill ${change.name}.`
+      })
+      continue
+    }
+
+    applied.push({
+      path: `skills.${change.name}`,
+      action: change.changeType === 'remove' ? 'delete' : 'update',
+      detail: `Sync skill ${change.name}`
+    })
+    steps.push({
+      type: 'apply',
+      message: `Apply skill ${change.name}.`
+    })
+  }
+
+  for (const change of input.diff.mcpChanges) {
+    applied.push({
+      path: `mcps.${change.name}`,
+      action: change.changeType === 'remove' ? 'delete' : 'update',
+      detail: `Sync MCP ${change.name}`
+    })
+    steps.push({
+      type: 'apply',
+      message: `Apply MCP ${change.name}.`
+    })
+  }
+
+  for (const change of input.diff.hookChanges) {
+    const hookKey = `${change.name}:${change.event}`
+
+    if (change.sourceHook?.portability === 'manual') {
+      skipped.push({
+        code: 'MANUAL_HOOK_MAPPING',
+        reason: `Hook ${change.name} (${change.event}) requires manual mapping.`,
+        path: `hooks.${hookKey}`
+      })
+      manualActions.push({
+        title: `Review hook ${change.name} (${change.event})`,
+        description: 'Manually adapt this hook for the target platform.',
+        path: `hooks.${hookKey}`
+      })
+      steps.push({
+        type: 'skip',
+        message: `Skip manual hook ${change.name} (${change.event}).`
+      })
+      continue
+    }
+
+    applied.push({
+      path: `hooks.${hookKey}`,
+      action: change.changeType === 'remove' ? 'delete' : 'update',
+      detail: `Sync hook ${change.name} (${change.event})`
+    })
+    steps.push({
+      type: 'apply',
+      message: `Apply hook ${change.name} (${change.event}).`
+    })
+  }
+
   return {
     applied,
     warnings,
