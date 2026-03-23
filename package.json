@@ -1,0 +1,26 @@
+{
+  "name": "config-sync-tool",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "config-sync": "dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsx src/cli/index.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "commander": "^9.5.0",
+    "toml": "^3.0.0",
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.87",
+    "tsx": "^3.14.0",
+    "typescript": "^5.4.5",
+    "vite": "^4.5.5",
+    "vitest": "^0.34.6"
+  }
+}
