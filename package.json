@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "bin": {
-    "config-sync": "dist/cli/index.js"
+    "config-sync": "dist/src/cli/index.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

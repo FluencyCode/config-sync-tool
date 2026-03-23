@@ -46,7 +46,7 @@ npm run build
 ### 3. 运行 CLI
 
 ```bash
-node dist/cli/index.js --help
+node dist/src/cli/index.js --help
 ```
 
 也可以直接走开发模式：
@@ -67,7 +67,7 @@ npm run dev -- --help
 扫描当前可发现的 Claude / Codex 配置源。
 
 ```bash
-node dist/cli/index.js scan \
+node dist/src/cli/index.js scan \
   --home-dir "$HOME" \
   --project-dir "$PWD"
 ```
@@ -77,7 +77,7 @@ node dist/cli/index.js scan \
 检查 Claude / Codex 配置是否存在。
 
 ```bash
-node dist/cli/index.js doctor \
+node dist/src/cli/index.js doctor \
   --home-dir "$HOME" \
   --project-dir "$PWD"
 ```
@@ -87,7 +87,7 @@ node dist/cli/index.js doctor \
 预览两个工具之间的配置差异，不写入文件。
 
 ```bash
-node dist/cli/index.js diff \
+node dist/src/cli/index.js diff \
   --from claude \
   --to codex \
   --home-dir "$HOME" \
@@ -95,7 +95,7 @@ node dist/cli/index.js diff \
 ```
 
 ```bash
-node dist/cli/index.js diff \
+node dist/src/cli/index.js diff \
   --from codex \
   --to claude \
   --home-dir "$HOME" \
@@ -107,7 +107,7 @@ node dist/cli/index.js diff \
 默认是 dry-run。只有加 `--write` 才会实际写入目标文件。
 
 ```bash
-node dist/cli/index.js sync \
+node dist/src/cli/index.js sync \
   --from claude \
   --to codex \
   --home-dir "$HOME" \
@@ -117,7 +117,7 @@ node dist/cli/index.js sync \
 实际写入：
 
 ```bash
-node dist/cli/index.js sync \
+node dist/src/cli/index.js sync \
   --from codex \
   --to claude \
   --write \
