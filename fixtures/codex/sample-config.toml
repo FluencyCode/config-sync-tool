@@ -1,0 +1,7 @@
+model_provider = "custom"
+model = "gpt-5.2-codex"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[tools]
+web_search = true
