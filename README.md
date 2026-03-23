@@ -57,18 +57,26 @@ npm run dev -- --help
 
 ## 命令说明
 
-所有命令都需要显式传入：
+所有命令默认会自动识别当前用户主目录，并在输出中显示实际使用的目录：
 
-- `--home-dir <path>`：用户主目录
-- `--project-dir <path>`：项目目录
+- `--home-dir <path>`：可选，手动覆盖用户主目录
+- `--project-dir <path>`：可选，指定项目目录；不传则不处理项目级配置
+- `--json`：输出 JSON，包含 `context.homeDir` 和 `context.projectDir`
 
 ### scan
 
 扫描当前可发现的 Claude / Codex 配置源。
 
+只扫描用户级配置：
+
+```bash
+node dist/src/cli/index.js scan
+```
+
+同时扫描项目级配置：
+
 ```bash
 node dist/src/cli/index.js scan \
-  --home-dir "$HOME" \
   --project-dir "$PWD"
 ```
 
@@ -76,9 +84,16 @@ node dist/src/cli/index.js scan \
 
 检查 Claude / Codex 配置是否存在。
 
+只检查用户级配置：
+
+```bash
+node dist/src/cli/index.js doctor
+```
+
+同时检查项目级配置：
+
 ```bash
 node dist/src/cli/index.js doctor \
-  --home-dir "$HOME" \
   --project-dir "$PWD"
 ```
 
@@ -86,19 +101,20 @@ node dist/src/cli/index.js doctor \
 
 预览两个工具之间的配置差异，不写入文件。
 
+只基于用户级配置：
+
 ```bash
 node dist/src/cli/index.js diff \
   --from claude \
-  --to codex \
-  --home-dir "$HOME" \
-  --project-dir "$PWD"
+  --to codex
 ```
+
+带项目级配置：
 
 ```bash
 node dist/src/cli/index.js diff \
   --from codex \
   --to claude \
-  --home-dir "$HOME" \
   --project-dir "$PWD"
 ```
 
@@ -106,26 +122,29 @@ node dist/src/cli/index.js diff \
 
 默认是 dry-run。只有加 `--write` 才会实际写入目标文件。
 
+只基于用户级配置预览：
+
 ```bash
 node dist/src/cli/index.js sync \
   --from claude \
-  --to codex \
-  --home-dir "$HOME" \
-  --project-dir "$PWD"
+  --to codex
 ```
 
-实际写入：
+带项目级配置实际写入：
 
 ```bash
 node dist/src/cli/index.js sync \
   --from codex \
   --to claude \
   --write \
-  --home-dir "$HOME" \
   --project-dir "$PWD"
 ```
 
-## 写入行为
+## 输出说明
+
+- 默认输出文本结果
+- 加 `--json` 输出 JSON
+- 文本和 JSON 都会显示实际使用的目录上下文，便于确认自动识别结果是否正确
 
 - `sync` 不带 `--write` 时，只做预览
 - 带 `--write` 时，工具会把源配置映射到目标格式并写入
@@ -134,6 +153,8 @@ node dist/src/cli/index.js sync \
 
 ## 参数约束
 
+- `--home-dir` 不传时，默认使用当前用户主目录
+- `--project-dir` 不传时，不处理项目级配置
 - `--from` / `--to` 仅支持：`claude`、`codex`
 - `--from` 和 `--to` 不能相同
 

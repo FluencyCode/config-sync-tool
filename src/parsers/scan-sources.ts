@@ -3,7 +3,7 @@ import { discoverCodexSources } from '../adapters/codex/discovery.js'
 
 export interface ScanSourcesOptions {
   homeDir: string
-  projectDir: string
+  projectDir?: string
 }
 
 export interface ScanSourcesResult {
@@ -16,9 +16,9 @@ export async function scanSources(
 ): Promise<ScanSourcesResult> {
   const [claudeUser, claudeProject, codexUser, codexProject] = await Promise.all([
     discoverClaudeSources(options.homeDir, 'user'),
-    discoverClaudeSources(options.projectDir, 'project'),
+    options.projectDir ? discoverClaudeSources(options.projectDir, 'project') : Promise.resolve([]),
     discoverCodexSources(options.homeDir, 'user'),
-    discoverCodexSources(options.projectDir, 'project')
+    options.projectDir ? discoverCodexSources(options.projectDir, 'project') : Promise.resolve([])
   ])
 
   return {

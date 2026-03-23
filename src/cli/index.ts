@@ -1,3 +1,4 @@
+import os from 'node:os'
 import { pathToFileURL } from 'node:url'
 import { Command, InvalidArgumentError } from 'commander'
 import { runScanCommand } from './commands/scan.js'
@@ -10,11 +11,14 @@ import {
   renderDiffTextReport,
   renderSyncTextReport
 } from '../reporters/text-reporter.js'
-import { renderJsonReport } from '../reporters/json-reporter.js'
+import {
+  attachReportContext,
+  renderJsonReport
+} from '../reporters/json-reporter.js'
 
 interface CliSharedOptions {
-  homeDir: string
-  projectDir: string
+  homeDir?: string
+  projectDir?: string
   json?: boolean
 }
 
@@ -44,8 +48,15 @@ export function validateToolPair(
 function addSharedPathOptions(command: Command): Command {
   return command
     .option('--json')
-    .requiredOption('--home-dir <path>')
-    .requiredOption('--project-dir <path>')
+    .option('--home-dir <path>')
+    .option('--project-dir <path>')
+}
+
+function resolveCliContext(options: CliSharedOptions): { homeDir: string, projectDir?: string } {
+  return {
+    homeDir: options.homeDir ?? os.homedir(),
+    projectDir: options.projectDir
+  }
 }
 
 export function isCliEntrypoint(importMetaUrl: string, argv1?: string): boolean {
@@ -62,11 +73,15 @@ export function buildCli(): Command {
   cli.name('config-sync')
 
   addSharedPathOptions(cli.command('scan')).action(async (options: CliSharedOptions) => {
-    const result = await runScanCommand({
-      homeDir: options.homeDir,
-      projectDir: options.projectDir
-    })
-    console.log(options.json ? renderJsonReport(result) : renderScanTextReport(result.sources))
+    const context = resolveCliContext(options)
+    const result = await runScanCommand(context)
+    console.log(options.json
+      ? renderJsonReport(attachReportContext(context, result))
+      : renderScanTextReport({
+          homeDir: context.homeDir,
+          projectDir: context.projectDir,
+          sources: result.sources
+        }))
   })
 
   addSharedPathOptions(cli.command('diff'))
@@ -74,18 +89,21 @@ export function buildCli(): Command {
     .requiredOption('--to <tool>', 'target tool', parseTool)
     .action(async (options: CliDiffOptions) => {
       validateToolPair(options.from, options.to)
+      const context = resolveCliContext(options)
       const result = await runDiffCommand({
         from: options.from,
         to: options.to,
         dryRun: true,
-        homeDir: options.homeDir,
-        projectDir: options.projectDir
+        homeDir: context.homeDir,
+        projectDir: context.projectDir
       })
       console.log(options.json
-        ? renderJsonReport(result)
+        ? renderJsonReport(attachReportContext(context, result))
         : renderDiffTextReport({
             from: options.from,
             to: options.to,
+            homeDir: context.homeDir,
+            projectDir: context.projectDir,
             changeCount: result.diff.profileChanges.length + result.diff.ruleChanges.length
           }))
     })
@@ -96,16 +114,19 @@ export function buildCli(): Command {
     .option('--write')
     .action(async (options: CliDiffOptions) => {
       validateToolPair(options.from, options.to)
+      const context = resolveCliContext(options)
       const result = await runSyncCommand({
         from: options.from,
         to: options.to,
         dryRun: !options.write,
-        homeDir: options.homeDir,
-        projectDir: options.projectDir
+        homeDir: context.homeDir,
+        projectDir: context.projectDir
       })
       console.log(options.json
-        ? renderJsonReport(result)
+        ? renderJsonReport(attachReportContext(context, result))
         : renderSyncTextReport({
+            homeDir: context.homeDir,
+            projectDir: context.projectDir,
             dryRun: !options.write,
             summary: result.summary,
             appliedFiles: result.appliedFiles
@@ -113,11 +134,15 @@ export function buildCli(): Command {
     })
 
   addSharedPathOptions(cli.command('doctor')).action(async (options: CliSharedOptions) => {
-    const result = await runDoctorCommand({
-      homeDir: options.homeDir,
-      projectDir: options.projectDir
-    })
-    console.log(options.json ? renderJsonReport(result) : renderDoctorTextReport(result.issues))
+    const context = resolveCliContext(options)
+    const result = await runDoctorCommand(context)
+    console.log(options.json
+      ? renderJsonReport(attachReportContext(context, result))
+      : renderDoctorTextReport({
+          homeDir: context.homeDir,
+          projectDir: context.projectDir,
+          issues: result.issues
+        }))
   })
 
   return cli

@@ -2,7 +2,7 @@ import { scanSources } from '../../parsers/scan-sources.js'
 
 export interface RunScanCommandOptions {
   homeDir: string
-  projectDir: string
+  projectDir?: string
 }
 
 export interface ScanCommandResult {

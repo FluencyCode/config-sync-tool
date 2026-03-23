@@ -8,7 +8,7 @@ export interface RunDiffCommandOptions {
   to: 'claude' | 'codex'
   dryRun: boolean
   homeDir: string
-  projectDir: string
+  projectDir?: string
 }
 
 export interface DiffCommandResult {
@@ -16,17 +16,19 @@ export interface DiffCommandResult {
   diff: ReturnType<typeof diffUnifiedConfig>
 }
 
-async function loadClaudeProject(projectDir: string, homeDir: string) {
+async function loadClaudeProject(projectDir: string | undefined, homeDir: string) {
   const settings = (await loadStructuredFile(`${homeDir}/.claude/settings.json`)).data as Record<string, unknown>
-  return mapClaudeToUnified({
-    settings,
-    ruleFiles: [
-      {
+  const ruleFiles = projectDir
+    ? [{
         path: `${projectDir}/.claude/CLAUDE.md`,
         content: (await loadStructuredFile(`${projectDir}/.claude/CLAUDE.md`)).raw
-      }
-    ],
-    scope: 'project'
+      }]
+    : []
+
+  return mapClaudeToUnified({
+    settings,
+    ruleFiles,
+    scope: projectDir ? 'project' : 'user'
   })
 }
 

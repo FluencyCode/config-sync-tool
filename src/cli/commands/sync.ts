@@ -22,13 +22,15 @@ async function loadSourceUnifiedConfig(options: RunDiffCommandOptions) {
     const settings = (await loadStructuredFile(`${options.homeDir}/.claude/settings.json`)).data as Record<string, unknown>
     return mapClaudeToUnified({
       settings,
-      ruleFiles: [
-        {
-          path: `${options.projectDir}/.claude/CLAUDE.md`,
-          content: (await loadStructuredFile(`${options.projectDir}/.claude/CLAUDE.md`)).raw
-        }
-      ],
-      scope: 'project'
+      ruleFiles: options.projectDir
+        ? [
+            {
+              path: `${options.projectDir}/.claude/CLAUDE.md`,
+              content: (await loadStructuredFile(`${options.projectDir}/.claude/CLAUDE.md`)).raw
+            }
+          ]
+        : [],
+      scope: options.projectDir ? 'project' : 'user'
     })
   }
 
@@ -51,7 +53,7 @@ function buildApplySteps(
   return patch.files.map((file) => ({
     path: options.to === 'claude'
       ? path.join(
-          file.path.endsWith('settings.json') ? options.homeDir : options.projectDir,
+          file.path.endsWith('settings.json') ? options.homeDir : (options.projectDir ?? options.homeDir),
           file.path
         )
       : path.join(options.homeDir, file.path),
